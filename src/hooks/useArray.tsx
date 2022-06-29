@@ -8,7 +8,8 @@ const useArray = <T extends any>(
   remove: (index: number) => void
   shift: () => void
   setArray: (array: T[]) => void
-  updateElement: (index: number) => (newItem: T) => void
+  update: (index: number) => (newItem: T) => void
+  setArrayDispatch: React.Dispatch<React.SetStateAction<T[]>>
 } => {
   const [array, setArrayDispatch] = useState<T[]>(initialArray)
 
@@ -32,7 +33,7 @@ const useArray = <T extends any>(
     }
   }
 
-  const updateElement = (index: number) => (newItem: T) => {
+  const update = (index: number) => (newItem: T) => {
     if (index > -1 && index < array.length) {
       setArrayDispatch((oldArray) => {
         const tempArr = [...oldArray]
@@ -50,7 +51,7 @@ const useArray = <T extends any>(
     })
   }
 
-  return { array, push, remove, shift, setArray, updateElement }
+  return { array, push, remove, shift, setArray, update, setArrayDispatch }
 }
 
 export default useArray

@@ -1,102 +1,30 @@
-import { css, StyleSheet } from 'aphrodite'
-import { FC, useEffect, useLayoutEffect, useRef } from 'react'
-import { ITreeItem } from './TreeView'
+import React, { memo } from 'react'
 
-interface TreeItemProps {
-  item: ITreeItem
-  setPos: (x: number, y: number) => void
-}
+import { Handle, NodeProps, Position, Box } from 'react-flow-renderer'
+import { NodeData } from './TreeView'
 
-const TreeItem: FC<TreeItemProps> = ({ item, setPos }) => {
-  const itemRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!itemRef.current) return
-    itemRef.current.style.top = item.y + 'px'
-    itemRef.current.style.left = item.x + 'px'
-  }, [item])
-
-  useLayoutEffect(() => {
-    if (itemRef.current) {
-      dragElement(itemRef.current, setPos)
-    }
-  }, [])
-
+export default memo(({ data, isConnectable }: NodeProps<NodeData>) => {
   return (
-    <div ref={itemRef} className={css(styles.mydiv)}>
-      <p>{item.title}</p>
-    </div>
+    <>
+      <Handle
+        type='target'
+        position={Position.Left}
+        onConnect={(params) => console.log('handle onConnect', params)}
+        isConnectable={true}
+        style={{ background: '#222', padding: 1 }}
+      />
+      <div style={{ top: 10, border: '1px solid #222', padding: '10px 15px', borderRadius: 5, fontSize: 12 }}>
+        {data.label}
+        <p>{data.type}</p>
+      </div>
+      <Handle
+        type='source'
+        position={Position.Right}
+        id='a'
+        onConnect={(params) => console.log('handle onConnect', params)}
+        style={{ background: '#222', padding: 2, transform: 'translateX(2px) translateY(-50%)' }}
+        isConnectable={isConnectable}
+      />
+    </>
   )
-}
-
-const styles = StyleSheet.create({
-  mydiv: {
-    position: 'absolute',
-    zIndex: 5,
-    backgroundColor: '#f1f1f1',
-    border: '1px solid #d3d3d3',
-    textAlign: 'center',
-    width: 200,
-    height: 120,
-    borderRadius: 10,
-    overflow: 'hidden',
-    cursor: 'pointer',
-  },
 })
-
-function dragElement(elmnt: any, onDrag: (x: number, y: number) => void) {
-  var pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0
-
-  if (document.getElementById(elmnt.id + 'header')) {
-    /* if present, the header is where you move the DIV from:*/
-    const header = document.getElementById(elmnt.id + 'header')
-    if (header) {
-      header.onmousedown = dragMouseDown
-    }
-  } else {
-    /* otherwise, move the DIV from anywhere inside the DIV:*/
-    elmnt.onmousedown = dragMouseDown
-  }
-
-  function dragMouseDown(e: any) {
-    e = e || window.event
-    e.preventDefault()
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX
-    pos4 = e.clientY
-    document.onmouseup = closeDragElement
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag
-  }
-
-  function elementDrag(e: MouseEvent) {
-    e = e || window.event
-    e.preventDefault()
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX
-    pos2 = pos4 - e.clientY
-    pos3 = e.clientX
-    pos4 = e.clientY
-
-    const target = e.target as Node
-
-    const parent = target.parentNode as HTMLDivElement
-
-    onDrag(elmnt.offsetLeft - pos1, elmnt.offsetTop - pos2)
-
-    // set the element's new position:
-    elmnt.style.top = elmnt.offsetTop - pos2 + 'px'
-    elmnt.style.left = elmnt.offsetLeft - pos1 + 'px'
-  }
-
-  function closeDragElement() {
-    /* stop moving when mouse button is released:*/
-    document.onmouseup = null
-    document.onmousemove = null
-  }
-}
-
-export default TreeItem
